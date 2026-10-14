@@ -2,7 +2,7 @@
 .env.*
 !.env.example
 .venv/
-.repomentor/
+.repomentor
 __pycache__/
 *.py[cod]
 .pytest_cache/

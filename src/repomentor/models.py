@@ -22,7 +22,11 @@ class Rule:
     parent_version: int | None = None
     relations: list[dict] = field(default_factory=list)
     provenance: dict | None = None
-    review_backend: str = "llm"
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """读取旧规范时忽略已废弃字段，保留规范正文与版本。"""
+        return cls(**{key: value for key, value in data.items() if key in cls.__dataclass_fields__})
 
     def to_dict(self) -> dict:
         return asdict(self)

@@ -68,7 +68,6 @@ CHAT_TOOLS = [
             "condition": STRING,
             "exceptions": STRING,
             "mandatory": {"type": "boolean"},
-            "review_backend": {"type": "string", "enum": ["llm", "jev"]},
             "id": STRING,
         },
         ["requirement", "paths"],
@@ -91,7 +90,7 @@ INSTRUCTIONS = (
     "其他请求按其实际目的处理，不转成规范管理或代码开发。"
     "开发者要求添加长期开发规范时，整理成明确要求、文件范围、适用条件和例外，调用 draft_rule。"
     "不扩大要求；本次临时编码要求不能变成长期规范。范围不清楚可询问开发者。"
-    "新规范默认 mandatory=true、review_backend=llm；可以按开发者要求提出其他设置。当前全变更评审统一由 Jev 先判断，review_backend 仅是历史兼容标记，不表示跳过 Jev。"
+    "新规范默认 mandatory=true；全部规范由独立 LLM Reviewer 评审，必选规范不能遗漏验收覆盖。"
     "修改草稿要保留其 id，调用 draft_rule 创建新版本；不能直接覆盖已有生效规范。"
     "草稿由程序完整展示并等待确认，不能在起草同一轮自动确认。"
     "开发者已经确认且宿主提供 approval 时，必须调用 confirm_rule，用 approval 的 ID、版本和替代参数。"
@@ -271,7 +270,6 @@ class RuleChat:
             "condition": args.get("condition", old.condition if old else ""),
             "exceptions": args.get("exceptions", old.exceptions if old else ""),
             "mandatory": args.get("mandatory", old.mandatory if old else True),
-            "review_backend": args.get("review_backend", old.review_backend if old else "llm"),
         }
         active_rules = self.store.rules(self.repo["id"])
         current_versions = {(r.id, r.version) for r in active_rules}
@@ -410,9 +408,7 @@ class RuleChat:
                 "适用文件：" + "、".join(draft.paths),
                 "适用条件：" + (draft.condition or "所列文件范围内适用"),
                 "例外：" + (draft.exceptions or "无"),
-                "验收策略："
-                + ("必选规范，验收不可遗漏" if draft.mandatory else "普通规范")
-                + f"；历史评审标记：{draft.review_backend}",
+                "验收策略：" + ("必选规范，验收不可遗漏" if draft.mandatory else "普通规范"),
             ]
             for relation in draft.relations:
                 lines.append(

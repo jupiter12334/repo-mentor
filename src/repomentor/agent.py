@@ -19,7 +19,6 @@ from repomentor.bash import BashRunner
 from repomentor.file_actions import delete_regular_file, modify_text_file
 from repomentor.harness.context import COMPACTION_INSTRUCTIONS, ContextCompactor
 from repomentor.harness.hooks import Hooks
-from repomentor.judgement import JevRuleJudge
 from repomentor.mcp_client import MCPBridge
 from repomentor.permissions import PathPermissions, PermissionDenied
 from repomentor.progress import tool_finished, tool_started
@@ -198,10 +197,7 @@ class Agent:
                 model.for_review(run["profile"]["review"]["model"])
                 if hasattr(model, "for_review")
                 else model,
-                JevRuleJudge.from_policy(store, run["profile"]["review"]["rule_judge"])
-                if run["profile"]["review"].get("rule_judge")
-                else None,
-                scope=run["profile"]["review"].get("scope"),
+                scope=run["profile"]["review"].get("scope", "all_changes"),
             )
             if run["profile"].get("review", {}).get("enabled")
             else None,

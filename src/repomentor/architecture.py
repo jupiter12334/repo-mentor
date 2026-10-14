@@ -315,7 +315,6 @@ def architecture_rule(record: dict | None, paths: list[str]) -> Rule | None:
         paths=targets,
         status="active",
         mandatory=True,
-        review_backend="jev",
         source=record["source"],
     )
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "repomentor"
-version = "0.10.0"
+version = "0.11.0"
 description = "具有评审反馈记忆、团队规范选择和执行验收能力的编码智能体"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -20,6 +20,12 @@ dependencies = [
 
 [project.scripts]
 repomentor = "repomentor.cli:main"
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "src/repomentor", "skills", "README.md", "NOTICE.md", "LICENSE",
+    ".env.example", "pyproject.toml", "uv.lock", ".gitignore",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/repomentor"]

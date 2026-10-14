@@ -3,6 +3,7 @@
 import fcntl
 import uuid
 
+from repomentor.models import Rule
 from repomentor.store import Store
 from repomentor.workflow import WorkflowJournal, validate_extraction
 
@@ -105,7 +106,12 @@ def continue_learning(store: Store, id: str, model) -> dict:
 
                 related = relate_rules(journal, data, record["paths"], rules)
                 record["relations"] = related["relations"]
-                options = dict(record["options"])
+                # 续跑旧反馈时只使用仍受支持的规范字段。
+                options = {
+                    key: value
+                    for key, value in record["options"].items()
+                    if key in Rule.__dataclass_fields__
+                }
                 if options.get("kind") == "exception":
                     # 文件例外的豁免范围来自显式参数，模型不能扩展成条件型豁免。
                     data = {**data, "condition": ""}

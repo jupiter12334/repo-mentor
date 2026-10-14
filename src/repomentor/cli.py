@@ -115,12 +115,6 @@ def parser() -> argparse.ArgumentParser:
     rules.add_argument("--exceptions", default="")
     rules.add_argument("--source", default="人工评审反馈")
     rules.add_argument("--checker", help="检查器 JSON 文件")
-    rules.add_argument(
-        "--review-backend",
-        choices=["llm", "jev"],
-        default="llm",
-        help="历史规范评审标记；当前全部改动先由 Jev 判断",
-    )
     rules.add_argument("--mandatory", action="store_true")
     rules.add_argument("--all", action="store_true")
     rules.add_argument("--parent", help="具体文件例外所绑定的父规范 ID")
@@ -247,7 +241,6 @@ def dispatch(args, store: Store) -> int:
                 source=args.source,
                 mandatory=args.mandatory,
                 checker=checker,
-                review_backend=args.review_backend,
                 kind="exception" if args.parent else "requirement",
                 parent_id=args.parent,
                 parent_version=args.parent_version,

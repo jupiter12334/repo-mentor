@@ -27,7 +27,7 @@ from repomentor.selection import digest
 from repomentor.store import Store
 from repomentor.workspace import fingerprint, git, git_names, has_head, tracked_files
 
-VALIDATION_VERSION = 5
+VALIDATION_VERSION = 6
 
 
 def capture_baseline(store: Store, run: dict):
@@ -236,11 +236,13 @@ class BackgroundChecks:
                         word in k
                         for word in (
                             "ANTHROPIC",
-                            "TYPESAFE",
                             "GITHUB",
                             "GH_TOKEN",
                             "GITLAB",
-                            "KEV_API_KEY",
+                            "API_KEY",
+                            "TOKEN",
+                            "SECRET",
+                            "PASSWORD",
                         )
                     )
                 }
@@ -294,8 +296,6 @@ class BackgroundChecks:
                     self.reviewer is None
                     or self.reviewer.model.name != review_policy["model"]
                     or review_policy["version"] != REVIEW_VERSION
-                    or review_policy.get("rule_judge")
-                    != (self.reviewer.judge.policy if self.reviewer.judge else None)
                     or review_policy.get("scope", self.reviewer.scope) != self.reviewer.scope
                 ):
                     raise ValueError("Reviewer 配置缺失或版本变化，请重新建立运行")

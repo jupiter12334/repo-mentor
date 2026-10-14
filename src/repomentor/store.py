@@ -122,8 +122,6 @@ class Store:
         if any(p.startswith("/") or ".." in Path(p).parts for p in paths):
             raise ValueError("规范作用域必须是仓库内的相对路径或通配符")
         kind = kwargs.get("kind", "requirement")
-        if kwargs.get("review_backend", "llm") not in {"llm", "jev"}:
-            raise ValueError("规范评审后端必须是 llm 或 jev")
         if kind not in {"requirement", "exception"}:
             raise ValueError("规范类型必须是 requirement 或 exception")
         if kind == "requirement" and (
@@ -131,8 +129,6 @@ class Store:
         ):
             raise ValueError("普通规范不能绑定例外父规则")
         if kind == "exception":
-            if kwargs.get("review_backend", "llm") != "llm":
-                raise ValueError("文件例外由程序处理，不能指定 Jev 评审")
             parents = [r for r in self.rules(repo_id) if r.id == kwargs.get("parent_id")]
             if len(parents) != 1 or parents[0].kind != "requirement":
                 raise ValueError("例外必须绑定当前仓库的一条生效规范")
@@ -158,7 +154,7 @@ class Store:
                     (learning_key,),
                 ).fetchone()
                 if existing:
-                    return Rule(**json.loads(existing["data"]))
+                    return Rule.from_dict(json.loads(existing["data"]))
             id = id or "R" + uuid.uuid4().hex[:8]
             version = db.execute(
                 "SELECT COALESCE(MAX(version),0)+1 FROM rules WHERE repo_id=? AND id=?",
@@ -224,7 +220,7 @@ class Store:
             ):
                 raise ValueError("候选来源发生变化，请重新确认")
             if row["status"] == "active" and not replace:
-                return Rule(**{**data, "status": "active"})
+                return Rule.from_dict({**data, "status": "active"})
             if data.get("kind") == "exception":
                 parent = db.execute(
                     "SELECT version FROM rules WHERE repo_id=? AND id=? AND status='active'",
@@ -284,7 +280,7 @@ class Store:
                 "UPDATE rules SET status='active',data=? WHERE repo_id=? AND id=? AND version=?",
                 (json.dumps(data, ensure_ascii=False), repo_id, id, row["version"]),
             )
-        return Rule(**data)
+        return Rule.from_dict(data)
 
     def rules(self, repo_id: str, active_only: bool = True) -> list[Rule]:
         with self.connect() as db:
@@ -292,7 +288,7 @@ class Store:
             if active_only:
                 sql += " AND status='active'"
             rows = db.execute(sql + " ORDER BY id,version", (repo_id,))
-            return [Rule(**{**json.loads(r["data"]), "status": r["status"]}) for r in rows]
+            return [Rule.from_dict({**json.loads(r["data"]), "status": r["status"]}) for r in rows]
 
     def task(
         self,

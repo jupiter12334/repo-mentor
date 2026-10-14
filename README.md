@@ -6,7 +6,7 @@
 
 RepoMentor 把这些规范和目录说明保存下来。接到开发任务后，它会读取相关约定，再修改代码、运行检查和评审，减少每次从头交代项目背景的麻烦。
 
-技术栈：Python / Agent Harness / Context Engineering / Jev / MCP / SQLite
+技术栈：Python / Agent Harness / Context Engineering / MCP / SQLite
 
 ## 能做什么
 
@@ -26,9 +26,9 @@ RepoMentor 把这些规范和目录说明保存下来。接到开发任务后，
 
 ### 写完后检查代码
 
-先运行静态检查和项目测试，再让 Jev 检查每个改动文件、相关规范、架构约束和任务目标。完整文件路径和源码一起提供，便于判断文件放置是否合适。
+先运行静态检查和项目测试，再由独立的 `deepseek-flash` Reviewer 检查每个改动文件、开发规范、架构约束和任务目标。源码、完整路径和相关目录说明一起提供，便于判断代码行为与文件放置是否合适。
 
-置信度足够的结果直接处理；置信度低、违规证据不足或 Jev 接口不可用时，交给独立的 `deepseek-flash` 复核。违规需要附上真实路径、行号和源码引用。代码或规范发生变化后，原来的验收结果不能继续使用。
+Reviewer 只读取冻结的代码快照，不参与修改，也不能自行执行命令。违规需要附上真实路径、行号和源码引用，由程序核对；结果不确定或评审失败时不能自动完成任务。代码、规范或评审配置发生变化后，需要重新验收。
 
 ## 安装
 
@@ -51,10 +51,9 @@ ANTHROPIC_API_KEY=你的模型密钥
 ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
 MODEL_ID=deepseek-flash
 REVIEW_MODEL_ID=deepseek-flash
-TYPESAFE_API_KEY=你的Jev密钥
 ```
 
-编码模型可以更换，需支持 Anthropic 消息接口。Reviewer 默认使用 `deepseek-flash`，与编码模型分开配置；当前两者共用模型端点和密钥，因此端点需要支持相应模型。未配置 Jev 时会回退到 LLM 评审。
+编码模型可以更换，需支持 Anthropic 消息接口。Reviewer 默认使用 `deepseek-flash`，与编码模型分开配置；当前两者共用模型端点和密钥，因此端点需要支持相应模型。
 
 ## 使用
 
@@ -98,7 +97,7 @@ src/repomentor/
 ├── store.py、architecture.py  项目记忆与目录说明
 ├── chat.py、learning.py       规范确认与反馈整理
 ├── verification.py           后台检查、测试和验收记录
-├── judgement.py、review_all.py、reviewer.py  Jev 与 LLM 评审
+├── reviewer.py               独立代码评审
 └── mcp_client.py、mcp_server.py             MCP 接入
 skills/                       可按需读取的开发流程
 ```
