@@ -117,4 +117,3 @@ repomentor --session 会话ID
 
 - 模型检查可能遗漏问题，仍需要项目测试和人工确认。
 - 文件工具访问工作目录外的路径时会询问；Bash 通过命令限制后会直接执行，没有系统沙箱。
-- 开源来源和复用说明见 [NOTICE.md](NOTICE.md)，许可证为 [MIT](LICENSE)。
